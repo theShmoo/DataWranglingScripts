@@ -37,13 +37,20 @@ def getColumnNames(filenames, dialect=None):
     if dialect is None:
         dialect = getDialects(filenames)
 
-    column_names = set()
+    # use set for better performance but unsorted columns!
+    # column_names = set()
+    # use a list for sorting but check every time if it is in that list!
+    column_names = []
     for filename in filenames:
         with open(filename, "rb") as f_in:
             reader = csv.reader(f_in, dialect=dialect)
             headers = next(reader)
             for h in headers:
-                column_names.add(h)
+                # list version:
+                if h not in column_names:
+                    column_names.append(h)
+                # set version:
+                # column_names.add(h)
     return column_names
 
 
@@ -161,8 +168,13 @@ def csvLazyGet(filename, dialect=None):
             yield row
 
 
-def areEqualCSV(filenames):
-    """Check if the files of a list of names are equal."""
+def areEqualCSV(filenames, unordered=True):
+    """Check if the files of a list of names are equal.
+
+    unordered (Default True) checks if the rows have the same values,
+    but do not check for the right order. If False it also checks for the
+    ordering.
+    """
     gen_2 = csvLazyGet(filenames[0])
 
     are_equal = True
@@ -171,7 +183,10 @@ def areEqualCSV(filenames):
         for row_1 in csvLazyGet(filename):
             row_2 = gen_2.next()
 
-            are_equal = set(row_2) == set(row_1)
+            if unordered:
+                are_equal = set(row_2) == set(row_1)
+            else:
+                are_equal = row_2 == row_1
             if not are_equal:
                 print("rows from %s and %s are not equal." %
                       (filenames[0], filename))
@@ -182,3 +197,4 @@ def areEqualCSV(filenames):
             break
 
     gen_2.close()
+    return are_equal
