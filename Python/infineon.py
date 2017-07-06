@@ -21,7 +21,15 @@ def shortenColumnNames(column_names):
 
 
 def getIndicesOfColumnNames(names, column_names):
-    """Get the indices of the names of the first list in the second list."""
+    """Get the indices of the names of the first list in the second list.
+
+    names
+        is the first list
+    column_names
+        is the second list
+    Returns
+        a list of tuples with the index of the occurence in the list
+        names and the index of the occurence in column_names"""
     indices = []
     for count, name in enumerate(names):
         if name:

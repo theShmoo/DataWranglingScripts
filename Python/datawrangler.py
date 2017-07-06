@@ -32,7 +32,7 @@ def getCSVFilesFromFolder(folder_name):
     return all_files
 
 
-def getColumnNames(filenames, dialect=None):
+def getColumnNamesOfFiles(filenames, dialect=None):
     """Get a set of column names of the files."""
     if dialect is None:
         dialect = getDialects(filenames)
@@ -42,15 +42,31 @@ def getColumnNames(filenames, dialect=None):
     # use a list for sorting but check every time if it is in that list!
     column_names = []
     for filename in filenames:
-        with open(filename, "rb") as f_in:
-            reader = csv.reader(f_in, dialect=dialect)
-            headers = next(reader)
-            for h in headers:
-                # list version:
-                if h not in column_names:
-                    column_names.append(h)
-                # set version:
-                # column_names.add(h)
+        new_column_names = getColumnNames(filename, dialect)
+        for c in new_column_names:
+            if c not in column_names:
+                column_names.append(c)
+    return column_names
+
+
+def getColumnNames(filename, dialect=None):
+    """Get a set of column names of a file."""
+    if dialect is None:
+        dialect = getDialect(filename)
+
+    # use set for better performance but unsorted columns!
+    # column_names = set()
+    # use a list for sorting but check every time if it is in that list!
+    column_names = []
+    with open(filename, "rb") as f_in:
+        reader = csv.reader(f_in, dialect=dialect)
+        headers = next(reader)
+        for h in headers:
+            # list version:
+            if h not in column_names:
+                column_names.append(h)
+            # set version:
+            # column_names.add(h)
     return column_names
 
 
